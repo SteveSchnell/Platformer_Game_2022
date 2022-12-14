@@ -12,30 +12,62 @@ public class Rail_Grinding : MonoBehaviour
     public float rotationSpeed = 5.0f;
     public string railName;
 
+    public bool isLoop = false;
+    public bool isStart = false;
+
+    private bool isPlayerOn = false;
+    private GameObject thePlayer;
+
+
     Vector3 last_position;
     Vector3 current_position;
 
     private void Start()
     {
-        //RailToGrind = GameObject.Find(railName).GetComponent<Editor_Rail_Script>();
+        if(RailToGrind == null)
+            RailToGrind = GameObject.Find(railName).GetComponent<Editor_Rail_Script>();
+
         last_position = transform.position;
     }
     private void Update()
     {
-        float distance = Vector3.Distance(RailToGrind.rail_objs[CurrentWayPointID].position, transform.position);
-        transform.position = Vector3.MoveTowards(transform.position, RailToGrind.rail_objs[CurrentWayPointID].position, Time.deltaTime * speed);
-
-        var rotation = Quaternion.LookRotation(RailToGrind.rail_objs[CurrentWayPointID].position - transform.position);
-        transform.rotation = Quaternion.Slerp (transform.rotation, rotation, Time.deltaTime * rotationSpeed);
-
-        if(distance <= reachDistance)
+        if (isStart)
         {
-            CurrentWayPointID++;
+            float distance = Vector3.Distance(RailToGrind.rail_objs[CurrentWayPointID].position, transform.position);
+            transform.position = Vector3.MoveTowards(transform.position, RailToGrind.rail_objs[CurrentWayPointID].position, Time.deltaTime * speed);
+
+            var rotation = Quaternion.LookRotation(RailToGrind.rail_objs[CurrentWayPointID].position - transform.position);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * rotationSpeed);
+
+            if (distance <= reachDistance)
+            {
+                CurrentWayPointID++;
+            }
+
+            if (CurrentWayPointID >= RailToGrind.rail_objs.Count && isLoop)
+            {
+                if(isLoop)
+                    CurrentWayPointID = 0;
+                else
+                {
+                    isStart = false;
+
+                    if (isPlayerOn) 
+                        thePlayer.transform.parent = null;
+
+                }
+            }
         }
+    }
 
-        if(CurrentWayPointID >= RailToGrind.rail_objs.Count)
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.tag == "Player")
         {
-            CurrentWayPointID = 0;
+            other.gameObject.transform.parent = gameObject.transform;
+            isStart = false;
+            isPlayerOn = true;
+            thePlayer = other.gameObject;
         }
     }
 }
