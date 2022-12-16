@@ -65,7 +65,7 @@ public class Rail_Grinding : MonoBehaviour
         if(other.gameObject.tag == "Player")
         {
             other.gameObject.transform.parent = gameObject.transform;
-            isStart = false;
+            isStart = true;
             isPlayerOn = true;
             thePlayer = other.gameObject;
         }
